@@ -1,12 +1,8 @@
-from pydantic import BaseModel
+from pydantic import Field
 
-from task.model import Task
+from base import BaseSchema
 
 
-class TaskSchema(BaseModel):
+class TaskSchema(BaseSchema):
     id: int | None = None
-    title: str
-
-    @classmethod
-    def from_model(cls, task: Task):
-        return cls(id=task.id, title=task.title)
+    title: str = Field(min_length=1)

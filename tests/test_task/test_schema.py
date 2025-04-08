@@ -46,3 +46,9 @@ def test_title_cannot_be_omitted():
 
     with pytest.raises(ValidationError):
         TaskSchema(**task_data)
+
+def test_title_cannot_be_empty_str():
+    task_data = {"id": 1, "title": ""}
+
+    with pytest.raises(ValidationError):
+        TaskSchema(**task_data)

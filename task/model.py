@@ -1,14 +1,10 @@
 from sqlalchemy.orm import MappedColumn, mapped_column
 
-from models import Base
+from base import BaseModel
 
 
-class Task(Base):
+class Task(BaseModel):
     __tablename__ = "task"
 
     id: MappedColumn[int] = mapped_column(primary_key=True)
     title: MappedColumn[str | None]
-
-
-    def to_dict(self):
-        return {"id": self.id, "title": self.title}
