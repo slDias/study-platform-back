@@ -4,7 +4,7 @@ import uuid
 import pytest
 from pydantic import ValidationError
 
-from task.schema import TaskSchema
+from task import TaskSchema
 
 
 def test():

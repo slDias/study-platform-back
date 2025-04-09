@@ -1,11 +1,20 @@
 import pytest
+from fastapi import FastAPI
 
+from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from starlette.testclient import TestClient
 
 from base import BaseModel
-from main import app
+from dependencies import get_session
+from main import app as main_app
 
+
+@pytest.fixture
+def empty_app(session) -> FastAPI:
+    fastapi_app = FastAPI()
+    _override_dependencies(fastapi_app, session)
+
+    return fastapi_app
 
 @pytest.fixture
 async def session():
@@ -19,7 +28,13 @@ async def session():
     async with AsyncSession() as session:
         yield session
 
-
 @pytest.fixture
-def client():
-    yield TestClient(app)
+def client(session):
+    _override_dependencies(main_app, session)
+    return TestClient(main_app)
+
+def _override_dependencies(app: FastAPI, session) -> None:
+    def _get_session():
+        return session
+
+    app.dependency_overrides[get_session] = _get_session

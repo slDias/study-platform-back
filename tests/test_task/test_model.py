@@ -1,6 +1,6 @@
 import pytest
 
-from task.model import Task
+from task import Task
 
 
 def test_create_task():
@@ -20,3 +20,15 @@ async def test_save_task(session):
 
     assert task.id is not None
     assert task.title == expected_title
+
+def test_title_cannot_be_empty():
+    with pytest.raises(ValueError):
+        Task(title='')
+
+def test_title_cannot_be_none():
+    with pytest.raises(ValueError):
+        Task(title=None)
+
+def test_title_cannot_be_omitted():
+    with pytest.raises(ValueError):
+        Task()

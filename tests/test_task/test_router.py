@@ -1,29 +1,18 @@
 import uuid
 
 import pytest
-from fastapi import FastAPI
-from sqlalchemy import select
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 
-from dependencies import get_session
-from task.model import Task
-from task.router import task_router
-from task.schema import TaskSchema
+from task import Task, task_router
 
 
-@pytest.fixture()
-async def client(session):
-    def _get_session():
-        return session
-
-    app = FastAPI()
-    app.include_router(task_router)
-    app.dependency_overrides[get_session] = _get_session
-
-    yield TestClient(app)
+@pytest.fixture
+async def client(empty_app, session):
+    empty_app.include_router(task_router)
+    return TestClient(empty_app)
 
 
-@pytest.fixture()
+@pytest.fixture
 async def task_in_db(session):
     task = Task(title=uuid.uuid4().hex)
     session.add(task)
@@ -69,7 +58,7 @@ class TestPost:
         assert task.title == res_data['title'] == expected_title
 
 
-    def test_create_task_with_invalid_data(self, client):
+    def test_create_task_with_no_data(self, client):
         res = client.post("/", json={})
 
         assert res.status_code == 422
