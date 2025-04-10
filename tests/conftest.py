@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 from fastapi import FastAPI
 
 from fastapi.testclient import TestClient
@@ -16,17 +17,24 @@ def empty_app(session) -> FastAPI:
 
     return fastapi_app
 
-@pytest.fixture
-async def session():
-    engine = create_async_engine("sqlite+aiosqlite://")
+
+@pytest_asyncio.fixture(scope="session", loop_scope="session")
+async def engine():
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
 
     async with engine.connect() as conn:
         await conn.run_sync(BaseModel.metadata.create_all)
 
-    AsyncSession = async_sessionmaker(engine, expire_on_commit=False)
+    yield engine
 
-    async with AsyncSession() as session:
-        yield session
+@pytest.fixture
+async def session(engine):
+    AsyncSession = async_sessionmaker(expire_on_commit=False, join_transaction_mode="create_savepoint")
+
+    async with engine.connect() as conn:
+        await conn.begin_nested()
+        async with AsyncSession(bind=conn) as s:
+            yield s
 
 @pytest.fixture
 def client(session):

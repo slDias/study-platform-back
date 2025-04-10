@@ -32,3 +32,14 @@ def test_title_cannot_be_none():
 def test_title_cannot_be_omitted():
     with pytest.raises(ValueError):
         Task()
+
+
+async def test_id_cannot_be_duplicate(session):
+    expected_title = "Task title"
+    task = Task(title=expected_title)
+    session.add(task)
+
+    await session.commit()
+
+    assert task.id is not None
+    assert task.title == expected_title
