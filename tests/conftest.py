@@ -3,6 +3,7 @@ import pytest_asyncio
 from fastapi import FastAPI
 
 from fastapi.testclient import TestClient
+from sqlalchemy import DDL
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from base import BaseModel
@@ -24,6 +25,7 @@ async def engine():
 
     async with engine.connect() as conn:
         await conn.run_sync(BaseModel.metadata.create_all)
+        await conn.execute(DDL("PRAGMA foreign_keys = ON"))
 
     yield engine
 

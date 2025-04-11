@@ -1,4 +1,4 @@
-from sqlalchemy.orm import MappedColumn, mapped_column, validates
+from sqlalchemy.orm import mapped_column, Mapped
 
 from base import BaseModel
 
@@ -6,8 +6,8 @@ from base import BaseModel
 class Task(BaseModel):
     __tablename__ = "task"
 
-    id: MappedColumn[int] = mapped_column(primary_key=True)
-    title: MappedColumn[str]
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
