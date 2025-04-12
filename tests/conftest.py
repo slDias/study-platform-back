@@ -29,6 +29,7 @@ async def engine():
 
     yield engine
 
+
 @pytest.fixture
 async def session(engine):
     AsyncSession = async_sessionmaker(expire_on_commit=False, join_transaction_mode="create_savepoint")
@@ -38,10 +39,12 @@ async def session(engine):
         async with AsyncSession(bind=conn) as s:
             yield s
 
+
 @pytest.fixture
 def client(session):
     _override_dependencies(main_app, session)
     return TestClient(main_app)
+
 
 def _override_dependencies(app: FastAPI, session) -> None:
     def _get_session():

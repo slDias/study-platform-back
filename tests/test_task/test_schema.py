@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from task import TaskSchema
 
 
-def test():
+def test_serialize_task():
     expected_id = random.randint(1, 10)
     expected_title = uuid.uuid4().hex
     task_data = {"id": expected_id, "title": expected_title}
