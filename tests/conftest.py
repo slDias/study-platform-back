@@ -51,3 +51,14 @@ def _override_dependencies(app: FastAPI, session) -> None:
         return session
 
     app.dependency_overrides[get_session] = _get_session
+
+
+# todo probably should be somewhere else.
+@pytest.fixture
+async def task_in_db(session):
+    from task import Task
+    import uuid
+    task = Task(title=uuid.uuid4().hex)
+    session.add(task)
+    await session.commit()
+    return task

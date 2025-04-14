@@ -12,14 +12,6 @@ async def client(empty_app, session):
     return TestClient(empty_app)
 
 
-@pytest.fixture
-async def task_in_db(session):
-    task = Task(title=uuid.uuid4().hex)
-    session.add(task)
-    await session.commit()
-    return task
-
-
 class TestGet:
 
     def test_list_task_endpoint(self, client, task_in_db):

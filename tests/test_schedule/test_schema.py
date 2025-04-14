@@ -88,7 +88,11 @@ def test_cron_is_required(good_data):
 
 
 def test_cron_must_be_valid_format(good_data):
-    assert False
+    data = good_data
+    data["cron"] = "abc"
+
+    with pytest.raises(ValidationError):
+        ScheduleSchema(**data)
 
 
 def test_time_limit_is_required(good_data):

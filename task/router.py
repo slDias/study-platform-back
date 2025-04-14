@@ -14,7 +14,7 @@ async def list_tasks(session: SessionDep):
 
 @task_router.get("/{task_id}")
 async def get_single_task(task_id: int, session: SessionDep, response: Response):
-    task = await session.scalar(select(Task).where(Task.id.is_(task_id)))
+    task = await session.get(Task, task_id)
 
     if not task:
         response.status_code = status.HTTP_404_NOT_FOUND
