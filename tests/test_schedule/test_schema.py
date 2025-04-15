@@ -40,6 +40,7 @@ def test_serialize_schedule(task_data):
     assert isinstance(schedule.task, TaskSchema)
     assert schedule.cron == expected_cron
     assert schedule.time_limit == expected_time_limit
+    assert schedule.task_id == schedule.task.id
 
 
 def test_id_can_be_none(good_data):
@@ -69,6 +70,13 @@ def test_task_can_be_an_id(good_data):
     schedule = ScheduleSchema(**data)
 
     assert schedule.task_id == expected_id
+
+def test_task_id_must_be_equal_to_specified_task_if_present(good_data):
+    data = good_data
+    data["task_id"] = data["task"]["id"] + 1
+
+    with pytest.raises(ValidationError):
+        ScheduleSchema(**data)
 
 
 def test_must_have_a_task(good_data):

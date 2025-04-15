@@ -4,7 +4,7 @@ from pydantic import Field, model_validator
 from croniter import croniter
 
 from base import BaseSchema
-from task import TaskSchema, Task
+from task import TaskSchema
 
 
 class ScheduleSchema(BaseSchema):
@@ -23,6 +23,13 @@ class ScheduleSchema(BaseSchema):
     def _check_has_a_task(self) -> Self:
         if self.task is None and self.task_id is None:
             raise ValueError('Schedule has no Task')
+
+        if not self.task_id:
+            self.task_id = self.task.id
+
+        if self.task_id and self.task and self.task_id != self.task.id:
+            raise ValueError(f'Specified task {self.task.id} and task id {self.task_id} does not match')
+
 
     def _check_cron_is_valid(self) -> Self:
         try:
