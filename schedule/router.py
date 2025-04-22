@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 from starlette import status
 from starlette.responses import Response
 
@@ -11,13 +12,20 @@ schedule_router = APIRouter()
 
 @schedule_router.get("/")
 async def list_schedules(session: SessionDep):
-    result = await session.scalars(select(Schedule))
+    result = await session.scalars(
+        select(Schedule)
+        .options(joinedload(Schedule.task))
+    )
     return [ScheduleSchema.model_validate(s) for s in result]
 
 
 @schedule_router.get("/{schedule_id}")
 async def get_single_schedule(schedule_id: int, session: SessionDep, response: Response):
-    result = await session.get(Schedule, schedule_id)
+    result = await session.scalar(
+        select(Schedule)
+        .options(joinedload(Schedule.task))
+        .filter(Schedule.id == schedule_id)
+    )
 
     if not result:
         response.status_code = status.HTTP_404_NOT_FOUND
@@ -37,7 +45,7 @@ async def create_schedule(schedule_data: ScheduleSchema, session: SessionDep, re
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"msg": f"Specified task {schedule_data.task_id} does not exist"}
 
-    # await session.refresh(schedule, attribute_names=("task", ))  # todo test this
+    await session.refresh(schedule, attribute_names=("task", ))
 
     return ScheduleSchema.model_validate(schedule)
 

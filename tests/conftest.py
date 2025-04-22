@@ -48,6 +48,7 @@ def client(session):
 
 def _override_dependencies(app: FastAPI, session) -> None:
     def _get_session():
+        session.expire_all()
         return session
 
     app.dependency_overrides[get_session] = _get_session
