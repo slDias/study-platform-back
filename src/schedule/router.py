@@ -56,7 +56,7 @@ async def update_schedule(schedule_id: int, schedule_data: ScheduleSchema, sessi
     try:
         schedule = await session.scalar(
             update(Schedule)
-            .where(Schedule.id.is_(schedule_id))
+            .where(Schedule.id == schedule_id)
             .values(**schedule_data.model_dump(exclude_none=True, exclude={"task"}))
             .returning(Schedule)
         )

@@ -32,7 +32,7 @@ async def create_task(task_data: TaskSchema, session: SessionDep):
 @task_router.put("/{task_id}")
 async def update_task(task_id: int, task_data: TaskSchema, session: SessionDep, response: Response):
     task = await session.scalar(
-        update(Task).where(Task.id.is_(task_id)).values(**task_data.model_dump(exclude_unset=True)).returning(Task)
+        update(Task).where(Task.id == task_id).values(**task_data.model_dump(exclude_unset=True)).returning(Task)
     )
 
     await session.commit()

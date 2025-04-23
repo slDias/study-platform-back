@@ -13,5 +13,3 @@ async def test_set_up():
     async with engine.connect() as connection:
         tables_in_db = await connection.run_sync(lambda c: inspect(c).get_table_names())
         assert all(t in tables_in_db for t in BaseModel.metadata.tables.keys())
-        fk_is_on = await connection.scalar(text("PRAGMA foreign_keys;"))
-        assert fk_is_on

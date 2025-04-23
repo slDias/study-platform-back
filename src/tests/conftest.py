@@ -3,7 +3,8 @@ import pytest_asyncio
 from fastapi import FastAPI
 
 from fastapi.testclient import TestClient
-from sqlalchemy import DDL
+from psycopg import AsyncClientCursor
+from sqlalchemy import DDL, event
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from base import BaseModel
@@ -21,11 +22,10 @@ def empty_app(session) -> FastAPI:
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def engine():
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    engine = create_async_engine("postgresql+psycopg://postgres:postgres@0.0.0.0:5432/postgres")
 
-    async with engine.connect() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(BaseModel.metadata.create_all)
-        await conn.execute(DDL("PRAGMA foreign_keys = ON"))
 
     yield engine
 

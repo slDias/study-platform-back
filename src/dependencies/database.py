@@ -7,14 +7,13 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, Asyn
 from base import BaseModel
 
 # todo create the engine based on env vars
-engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+engine = create_async_engine("postgresql+psycopg://postgres:postgres@0.0.0.0:5432/postgres")
 AsyncSession = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def set_up(engine: AsyncEngine) -> None:
     async with engine.connect() as conn:
         await conn.run_sync(BaseModel.metadata.create_all)
-        await conn.execute(DDL("PRAGMA foreign_keys = ON"))
 
 
 async def get_session() -> "AsyncSession":
