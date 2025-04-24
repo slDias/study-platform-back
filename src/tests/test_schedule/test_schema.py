@@ -5,7 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from schedule import ScheduleSchema
-from task import TaskSchema, Task
+from task import TaskSchema
 
 
 @pytest.fixture

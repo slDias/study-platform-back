@@ -1,3 +1,4 @@
+from os import environ
 from typing import Annotated
 
 from fastapi.params import Depends
@@ -7,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, Asyn
 from base import BaseModel
 
 # todo create the engine based on env vars
-engine = create_async_engine("postgresql+psycopg://postgres:postgres@0.0.0.0:5432/postgres")
+engine = create_async_engine(environ.get("DB_URL"))
 AsyncSession = async_sessionmaker(engine, expire_on_commit=False)
 
 

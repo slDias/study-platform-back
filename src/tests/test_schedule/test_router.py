@@ -1,7 +1,6 @@
 import uuid
 
 import pytest
-from sqlalchemy import select
 from starlette.testclient import TestClient
 
 from schedule import schedule_router, Schedule
@@ -12,13 +11,6 @@ from task import Task
 def client(empty_app):
     empty_app.include_router(schedule_router)
     return TestClient(empty_app)
-
-@pytest.fixture
-async def schedule_in_db(session, task_in_db):
-    s = Schedule(task=task_in_db, cron="0 0 * * 1", time_limit=24)
-    session.add(s)
-    await session.commit()
-    return s
 
 
 class TestGet:
