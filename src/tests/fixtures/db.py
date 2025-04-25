@@ -17,20 +17,23 @@ async def engine():
 
     yield engine
 
+    async with engine.begin() as conn:
+        await conn.run_sync(BaseModel.metadata.drop_all)
+
 
 @pytest.fixture
 async def make_session(engine):
-
     @asynccontextmanager
     async def _mk_session():
-        AsyncSession = async_sessionmaker(expire_on_commit=False, join_transaction_mode="create_savepoint")
+        async with AsyncSession(bind=conn) as s:
+            yield s
 
-        async with engine.connect() as conn:
-            await conn.begin_nested()
-            async with AsyncSession(bind=conn) as s:
-                yield s
+    AsyncSession = async_sessionmaker(expire_on_commit=False, join_transaction_mode="create_savepoint")
 
-    return _mk_session
+    async with engine.connect() as conn:
+        await conn.begin_nested()
+        yield _mk_session
+
 
 @pytest.fixture
 async def session(make_session):

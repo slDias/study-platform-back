@@ -79,6 +79,7 @@ class TestPut:
         assert res.status_code == 200
         res_data = res.json()
 
+        session.expire_all()
         task = await session.get(Task, res_data['id'])
         assert task is not None
         assert task.id == task_in_db.id
