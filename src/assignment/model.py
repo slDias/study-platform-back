@@ -14,5 +14,11 @@ class Assignment(BaseModel):
     task_id: Mapped[int] = mapped_column(ForeignKey("task.id"))
     scheduler: Mapped['Schedule'] = relationship()
     scheduler_id: Mapped[int] = mapped_column(ForeignKey("schedule.id"))
-    due_date: Mapped[datetime]
-    status: Mapped[str] = "Something"  # todo
+    due_datetime: Mapped[datetime]
+    submission_datetime: Mapped[datetime | None]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not self.task and not self.task_id:
+            raise ValueError("Schedule must have an associated task")

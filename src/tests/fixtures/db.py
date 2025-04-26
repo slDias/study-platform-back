@@ -2,6 +2,9 @@ from contextlib import asynccontextmanager
 
 import pytest
 import pytest_asyncio
+from psycopg.errors import DuplicateDatabase
+from sqlalchemy import text
+from sqlalchemy.exc import ProgrammingError
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -10,15 +13,27 @@ from base import BaseModel
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def engine():
-    engine = create_async_engine("postgresql+psycopg://postgres:postgres@0.0.0.0:5432/test")
+    default_db_engine = create_async_engine("postgresql+psycopg://postgres:postgres@0.0.0.0:5432/")
 
+    try:
+        async with default_db_engine.connect() as conn:
+            await conn.execution_options(isolation_level="AUTOCOMMIT")
+            await conn.execute(text("create database test"))
+    except ProgrammingError as e:
+        if not isinstance(e.orig, DuplicateDatabase):
+            raise
+
+    engine = create_async_engine("postgresql+psycopg://postgres:postgres@0.0.0.0:5432/test")
     async with engine.begin() as conn:
         await conn.run_sync(BaseModel.metadata.create_all)
 
     yield engine
 
-    async with engine.begin() as conn:
-        await conn.run_sync(BaseModel.metadata.drop_all)
+    await engine.dispose()
+
+    async with default_db_engine.connect() as conn:
+        await conn.execution_options(isolation_level="AUTOCOMMIT")
+        await conn.execute(text("drop database test"))
 
 
 @pytest.fixture

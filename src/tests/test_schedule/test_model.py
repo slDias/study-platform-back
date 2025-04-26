@@ -50,5 +50,6 @@ async def test_schedules_task_must_exist(session):
 
     with pytest.raises(IntegrityError):
         await session.commit()
-        assert s.id is not None
-        assert s.task_id is None
+
+    assert s.id is None
+    assert s.task is None
