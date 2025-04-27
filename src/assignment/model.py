@@ -22,3 +22,18 @@ class Assignment(BaseModel):
 
         if not self.task and not self.task_id:
             raise ValueError("Schedule must have an associated task")
+
+        self.due_datetime = _validate_datetime(self.due_datetime)
+
+        if self.submission_datetime:
+            self.submission_datetime = _validate_datetime(self.submission_datetime)
+
+
+def _validate_datetime(dt: datetime) -> datetime:
+    if isinstance(dt, str):
+        dt = datetime.fromisoformat(dt)
+
+    if dt.tzinfo is None:
+        raise ValueError("Schedule's due_datetime must be timezone aware")
+
+    return dt
