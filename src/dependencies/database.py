@@ -2,7 +2,6 @@ from os import environ
 from typing import Annotated
 
 from fastapi.params import Depends
-from sqlalchemy import DDL
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncEngine
 
 from base import BaseModel
