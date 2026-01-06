@@ -13,7 +13,7 @@ AsyncSession = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def set_up(engine: AsyncEngine) -> None:
-    async with engine.connect() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(BaseModel.metadata.create_all)
 
 

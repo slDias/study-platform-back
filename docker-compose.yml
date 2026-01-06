@@ -6,7 +6,7 @@ services:
     depends_on:
       - db
     environment:
-      DB_URL: "postgresql+psycopg://postgres:postgres@db:5432/postgres"
+      DB_URL: "postgresql+asyncpg://postgres:postgres@db:5432/postgres"
   db:
     image: "postgres:alpine"
     ports:
