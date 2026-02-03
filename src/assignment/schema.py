@@ -17,17 +17,19 @@ class AssignmentSchema(BaseSchema):
     due_datetime: datetime
     submission_datetime: datetime | None = None
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def _validate(self) -> Self:
         self._check_has_a_task()
         return self
 
     def _check_has_a_task(self) -> None:
         if self.task is None and self.task_id is None:
-            raise ValueError('Schedule has no Task')
+            raise ValueError("Schedule has no Task")
 
-        if not self.task_id:
+        if not self.task_id and self.task:
             self.task_id = self.task.id
 
         if self.task_id and self.task and self.task_id != self.task.id:
-            raise ValueError(f'Specified task {self.task.id} and task id {self.task_id} does not match')
+            raise ValueError(
+                f"Specified task {self.task.id} and task id {self.task_id} does not match"
+            )

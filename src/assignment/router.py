@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from fastapi import APIRouter
 from sqlalchemy import select
@@ -6,21 +6,18 @@ from sqlalchemy.orm import joinedload
 from starlette import status
 from starlette.responses import Response
 
-from assignment import Assignment
-from assignment.schema import AssignmentSchema
 from dependencies import SessionDep
+
+from .model import Assignment
+from .schema import AssignmentSchema
 
 assignment_router = APIRouter()
 
 
 @assignment_router.get("/")
 async def list_assignments(session: SessionDep, show_expired: bool = False):
-    query = (
-        select(Assignment)
-        .options(
-            joinedload(Assignment.task),
-            joinedload(Assignment.scheduler)
-        )
+    query = select(Assignment).options(
+        joinedload(Assignment.task), joinedload(Assignment.scheduler)
     )
 
     if show_expired is False:
@@ -32,7 +29,9 @@ async def list_assignments(session: SessionDep, show_expired: bool = False):
 
 
 @assignment_router.post("/{assignment_id}/submit")
-async def submit_assignment(session: SessionDep, assignment_id: int, response: Response):
+async def submit_assignment(
+    session: SessionDep, assignment_id: int, response: Response
+):
     assignment = await session.get(Assignment, assignment_id)
 
     if assignment is None:

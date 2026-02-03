@@ -2,10 +2,10 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from base import BaseModel
+from task import Task
 
 
 class Schedule(BaseModel):
-
     __tablename__ = "schedule"
 
     id: Mapped[int] = mapped_column(primary_key=True)

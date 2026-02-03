@@ -3,7 +3,7 @@ import uuid
 import pytest
 from starlette.testclient import TestClient
 
-from schedule import schedule_router, Schedule
+from schedule import Schedule, schedule_router
 from task import Task
 
 
@@ -18,13 +18,18 @@ class TestGet:
         res = client.get("/")
 
         assert res.status_code == 200
-        assert res.json() == [{
-            "id": schedule_in_db.id,
-            "task_id": schedule_in_db.task_id,
-            "task": {"id": schedule_in_db.task_id, "title": schedule_in_db.task.title},
-            "cron": schedule_in_db.cron,
-            "time_limit": schedule_in_db.time_limit
-        }]
+        assert res.json() == [
+            {
+                "id": schedule_in_db.id,
+                "task_id": schedule_in_db.task_id,
+                "task": {
+                    "id": schedule_in_db.task_id,
+                    "title": schedule_in_db.task.title,
+                },
+                "cron": schedule_in_db.cron,
+                "time_limit": schedule_in_db.time_limit,
+            }
+        ]
 
     def test_get_single_schedule(self, client, schedule_in_db):
         res = client.get(f"/{schedule_in_db.id}")
@@ -33,9 +38,12 @@ class TestGet:
         assert res.json() == {
             "id": schedule_in_db.id,
             "task_id": schedule_in_db.task_id,
-            "task": {"id": schedule_in_db.task_id, "title": schedule_in_db.task.title},
+            "task": {
+                "id": schedule_in_db.task_id,
+                "title": schedule_in_db.task.title,
+            },
             "cron": schedule_in_db.cron,
-            "time_limit": schedule_in_db.time_limit
+            "time_limit": schedule_in_db.time_limit,
         }
 
     def test_get_single_schedule_does_not_exist(self, client):
@@ -52,13 +60,13 @@ class TestPost:
         res = client.post("/", json=data)
 
         assert res.status_code == 200
-        s = await session.get(Schedule, res.json()['id'])
+        s = await session.get(Schedule, res.json()["id"])
         assert res.json() == {
             "id": s.id,
             "task_id": task_in_db.id,
             "task": {"id": task_in_db.id, "title": task_in_db.title},
             "cron": "0 0 * * 1",
-            "time_limit": 24
+            "time_limit": 24,
         }
 
     def test_create_schedule_task_does_not_exist(self, client):
@@ -69,19 +77,25 @@ class TestPost:
         assert res.status_code == 400
         assert res.json() == {"msg": "Specified task 1 does not exist"}
 
-    async def test_create_schedule_with_task_object(self, client, session, task_in_db):
-        data = {"task": {"id": task_in_db.id, "title": task_in_db.title}, "cron": "0 0 * * 1", "time_limit": 24}
+    async def test_create_schedule_with_task_object(
+        self, client, session, task_in_db
+    ):
+        data = {
+            "task": {"id": task_in_db.id, "title": task_in_db.title},
+            "cron": "0 0 * * 1",
+            "time_limit": 24,
+        }
 
         res = client.post("/", json=data)
 
         assert res.status_code == 200
-        s = await session.get(Schedule, res.json()['id'])
+        s = await session.get(Schedule, res.json()["id"])
         assert res.json() == {
             "id": s.id,
             "task_id": task_in_db.id,
             "task": {"id": task_in_db.id, "title": task_in_db.title},
             "cron": "0 0 * * 1",
-            "time_limit": 24
+            "time_limit": 24,
         }
 
     def test_create_schedule_task_with_invalid_cron(self, client, task_in_db):
@@ -91,7 +105,9 @@ class TestPost:
 
         assert res.status_code == 422
 
-    def test_create_schedule_task_with_invalid_time_limit(self, client, task_in_db):
+    def test_create_schedule_task_with_invalid_time_limit(
+        self, client, task_in_db
+    ):
         data = {"task_id": task_in_db.id, "cron": "0 0 * * 1", "time_limit": 0}
 
         res = client.post("/", json=data)
@@ -100,7 +116,6 @@ class TestPost:
 
 
 class TestPut:
-    
     async def test_update_schedule(self, client, session, schedule_in_db):
         new_task = Task(title=uuid.uuid4().hex)
         session.add(new_task)
@@ -108,7 +123,11 @@ class TestPut:
         expected_task_id = new_task.id
         expected_cron = "0 0 * * 2"
         expected_time_limit = 22
-        data = {"task_id": expected_task_id, "cron": expected_cron, "time_limit": expected_time_limit}
+        data = {
+            "task_id": expected_task_id,
+            "cron": expected_cron,
+            "time_limit": expected_time_limit,
+        }
 
         res = client.put(f"/{schedule_in_db.id}", json=data)
 
@@ -119,21 +138,25 @@ class TestPut:
             "task_id": expected_task_id,
             "task": {"id": new_task.id, "title": new_task.title},
             "cron": expected_cron,
-            "time_limit": expected_time_limit
+            "time_limit": expected_time_limit,
         }
 
-    def test_update_schedule_with_non_existent_task(self, client, schedule_in_db):
+        assert schedule_in_db.cron == expected_cron
+
+    def test_update_schedule_with_non_existent_task(
+        self, client, schedule_in_db
+    ):
         data = {"task_id": 999, "cron": "0 0 * * 2", "time_limit": 22}
 
         res = client.put(f"/{schedule_in_db.id}", json=data)
 
         assert res.status_code == 400
-        assert res.json() == {"msg": f"Specified task 999 does not exist"}
+        assert res.json() == {"msg": "Specified task 999 does not exist"}
 
     def test_update_non_existent_schedule(self, client, task_in_db):
         data = {"task_id": task_in_db.id, "cron": "0 0 * * 2", "time_limit": 22}
 
-        res = client.put(f"/1", json=data)
+        res = client.put("/1", json=data)
 
         assert res.status_code == 404
-        assert res.json() == {"msg": f"Specified schedule 1 does not exist"}
+        assert res.json() == {"msg": "Specified schedule 1 does not exist"}

@@ -1,15 +1,18 @@
 from os import environ
-from typing import Annotated
+from typing import Annotated, AsyncGenerator
 
 from fastapi.params import Depends
-from sqlalchemy import DDL
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncEngine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from base import BaseModel
 
-# todo create the engine based on env vars
-engine = create_async_engine(environ.get("DB_URL"))
-AsyncSession = async_sessionmaker(engine, expire_on_commit=False)
+engine = create_async_engine(environ["DB_URL"])
+AsyncSessionMaker = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def set_up(engine: AsyncEngine) -> None:
@@ -17,8 +20,9 @@ async def set_up(engine: AsyncEngine) -> None:
         await conn.run_sync(BaseModel.metadata.create_all)
 
 
-async def get_session() -> "AsyncSession":
-    async with AsyncSession() as session:
+async def get_session() -> AsyncGenerator[AsyncSession]:
+    async with AsyncSessionMaker() as session:
         yield session
+
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]

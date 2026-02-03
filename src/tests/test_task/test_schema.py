@@ -1,5 +1,6 @@
 import random
 import uuid
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -17,6 +18,7 @@ def test_serialize_task():
     assert serialized_task.id == expected_id
     assert serialized_task.title == expected_title
 
+
 def test_id_can_be_none():
     expected_title = uuid.uuid4().hex
     task_data = {"id": None, "title": expected_title}
@@ -26,14 +28,16 @@ def test_id_can_be_none():
     assert serialized_task.id is None
     assert serialized_task.title == expected_title
 
+
 def test_id_can_be_omitted():
     expected_title = uuid.uuid4().hex
-    task_data = {"title": expected_title}
+    task_data: dict[str, Any] = {"title": expected_title}
 
     serialized_task = TaskSchema(**task_data)
 
     assert serialized_task.id is None
     assert serialized_task.title == expected_title
+
 
 def test_title_cannot_be_none():
     task_data = {"id": 1, "title": None}
@@ -41,11 +45,13 @@ def test_title_cannot_be_none():
     with pytest.raises(ValidationError):
         TaskSchema(**task_data)
 
+
 def test_title_cannot_be_omitted():
-    task_data = {"id": 1}
+    task_data: dict[str, Any] = {"id": 1}
 
     with pytest.raises(ValidationError):
         TaskSchema(**task_data)
+
 
 def test_title_cannot_be_empty_str():
     task_data = {"id": 1, "title": ""}

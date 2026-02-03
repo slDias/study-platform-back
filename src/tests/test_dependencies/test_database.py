@@ -1,4 +1,4 @@
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from base import BaseModel

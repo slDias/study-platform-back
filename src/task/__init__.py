@@ -1,3 +1,5 @@
 from .model import Task
-from .schema import TaskSchema
 from .router import task_router
+from .schema import TaskSchema
+
+__all__ = ["Task", "task_router", "TaskSchema"]

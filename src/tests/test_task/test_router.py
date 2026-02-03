@@ -13,13 +13,11 @@ async def client(empty_app, session):
 
 
 class TestGet:
-
     def test_list_task_endpoint(self, client, task_in_db):
         res = client.get("/")
 
         assert res.status_code == 200
         assert res.json() == [{"id": task_in_db.id, "title": task_in_db.title}]
-
 
     def test_get_single_task_endpoint(self, client, task_in_db):
         res = client.get(f"/{task_in_db.id}")
@@ -35,7 +33,6 @@ class TestGet:
 
 
 class TestPost:
-
     async def test_create_task(self, client, session):
         expected_title = uuid.uuid4().hex
         td = {"title": expected_title}
@@ -45,22 +42,19 @@ class TestPost:
         assert res.status_code == 200
         res_data = res.json()
 
-        task = await session.get(Task, res_data['id'])
+        task = await session.get(Task, res_data["id"])
         assert task is not None
-        assert task.title == res_data['title'] == expected_title
-
+        assert task.title == res_data["title"] == expected_title
 
     def test_create_task_with_no_data(self, client):
         res = client.post("/", json={})
 
         assert res.status_code == 422
 
-
     def test_create_task_with_none_title(self, client):
         res = client.post("/", json={"title": None})
 
         assert res.status_code == 422
-
 
     def test_create_task_with_empty_title(self, client):
         res = client.post("/", json={"title": None})
@@ -69,7 +63,6 @@ class TestPost:
 
 
 class TestPut:
-
     async def test_update_task(self, client, session, task_in_db):
         expected_title = uuid.uuid4().hex
         td = {"title": expected_title}
@@ -80,15 +73,15 @@ class TestPut:
         res_data = res.json()
 
         session.expire_all()
-        task = await session.get(Task, res_data['id'])
+        task = await session.get(Task, res_data["id"])
         assert task is not None
         assert task.id == task_in_db.id
-        assert task.title == res_data['title'] == expected_title
+        assert task.title == res_data["title"] == expected_title
 
     def test_update_task_not_found(self, client, session):
         td = {"title": uuid.uuid4().hex}
 
-        res = client.put(f"/1", json=td)
+        res = client.put("/1", json=td)
 
         assert res.status_code == 404
         assert res.json() == {"msg": "No task with id 1"}

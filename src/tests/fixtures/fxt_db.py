@@ -2,10 +2,7 @@ from contextlib import asynccontextmanager
 
 import pytest
 import pytest_asyncio
-from psycopg.errors import DuplicateDatabase
 from sqlalchemy import DDL
-from sqlalchemy.exc import ProgrammingError
-
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from base import BaseModel
@@ -13,8 +10,9 @@ from base import BaseModel
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def engine():
-
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:", isolation_level="AUTOCOMMIT")
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:", isolation_level="AUTOCOMMIT"
+    )
     async with engine.begin() as conn:
         await conn.execute(DDL("PRAGMA foreign_keys = ON;"))
         await conn.run_sync(BaseModel.metadata.create_all)
@@ -31,7 +29,9 @@ async def make_session(engine):
         async with AsyncSession(bind=conn) as s:
             yield s
 
-    AsyncSession = async_sessionmaker(expire_on_commit=False, join_transaction_mode="create_savepoint")
+    AsyncSession = async_sessionmaker(
+        expire_on_commit=False, join_transaction_mode="create_savepoint"
+    )
 
     async with engine.connect() as conn:
         await conn.begin_nested()
@@ -40,5 +40,5 @@ async def make_session(engine):
 
 @pytest.fixture
 async def session(make_session):
-     async with make_session() as s:
+    async with make_session() as s:
         yield s

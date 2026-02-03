@@ -19,7 +19,7 @@ def good_data(task_data):
         "id": random.randint(1, 10),
         "task": task_data,
         "cron": "0 0 * * 1",
-        "time_limit": 24
+        "time_limit": 24,
     }
 
 
@@ -31,7 +31,7 @@ def test_serialize_schedule(task_data):
         "id": expected_id,
         "task": task_data,
         "cron": expected_cron,
-        "time_limit": expected_time_limit
+        "time_limit": expected_time_limit,
     }
 
     schedule = ScheduleSchema(**schedule_data)
@@ -70,6 +70,7 @@ def test_task_can_be_an_id(good_data):
     schedule = ScheduleSchema(**data)
 
     assert schedule.task_id == expected_id
+
 
 def test_task_id_must_be_equal_to_specified_task_if_present(good_data):
     data = good_data

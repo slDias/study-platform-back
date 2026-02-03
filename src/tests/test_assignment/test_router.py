@@ -1,4 +1,4 @@
-from datetime import datetime, UTC, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from starlette.testclient import TestClient
@@ -16,14 +16,15 @@ def client(empty_app):
 @pytest.fixture
 async def expired_assignment(session, schedule_in_db):
     due_dt = datetime.now(UTC) - timedelta(hours=5)
-    a = Assignment(task=schedule_in_db.task, scheduler=schedule_in_db, due_datetime=due_dt)
+    a = Assignment(
+        task=schedule_in_db.task, scheduler=schedule_in_db, due_datetime=due_dt
+    )
     session.add(a)
     await session.commit()
     return a
 
 
 class TestGet:
-
     def test_list_non_expired(self, client, assignment_in_db, expired_assignment):
         res = client.get("/")
 
@@ -42,7 +43,6 @@ class TestGet:
 
 
 class TestPost:
-
     async def test_set_as_done(self, client, session, assignment_in_db):
         res = client.post(f"/{assignment_in_db.id}/submit")
 
@@ -51,7 +51,6 @@ class TestPost:
         assert assignment_in_db.submission_datetime is not None
 
     def test_assignment_does_not_exists(self, client):
-        res = client.post(f"/9999/submit")
+        res = client.post("/9999/submit")
 
         assert res.status_code == 404
-

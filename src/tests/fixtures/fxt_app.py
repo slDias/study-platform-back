@@ -1,3 +1,5 @@
+from typing import AsyncGenerator
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -7,7 +9,7 @@ from main import app as main_app
 
 
 @pytest.fixture
-async def empty_app(make_session) -> FastAPI:
+async def empty_app(make_session) -> AsyncGenerator[FastAPI]:
     fastapi_app = FastAPI()
     async with make_session() as s:
         _override_dependencies(fastapi_app, s)
