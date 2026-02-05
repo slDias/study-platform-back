@@ -83,7 +83,7 @@ async def update_schedule(
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"msg": f"Specified task {schedule_data.task_id} does not exist"}
 
-    await session.commit()  # test
+    await session.commit()
     await session.refresh(schedule, attribute_names=("task",))
 
     return ScheduleSchema.model_validate(schedule)

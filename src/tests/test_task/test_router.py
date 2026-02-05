@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio.session import close_all_sessions
 
 from task import Task, task_router
 
@@ -42,6 +43,7 @@ class TestPost:
         assert res.status_code == 200
         res_data = res.json()
 
+        await close_all_sessions()
         task = await session.get(Task, res_data["id"])
         assert task is not None
         assert task.title == res_data["title"] == expected_title
@@ -72,7 +74,7 @@ class TestPut:
         assert res.status_code == 200
         res_data = res.json()
 
-        session.expire_all()
+        await close_all_sessions()
         task = await session.get(Task, res_data["id"])
         assert task is not None
         assert task.id == task_in_db.id

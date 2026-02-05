@@ -10,9 +10,7 @@ from base import BaseModel
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def engine():
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:", isolation_level="AUTOCOMMIT"
-    )
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
     async with engine.begin() as conn:
         await conn.execute(DDL("PRAGMA foreign_keys = ON;"))
         await conn.run_sync(BaseModel.metadata.create_all)
@@ -24,14 +22,15 @@ async def engine():
 
 @pytest.fixture
 async def make_session(engine):
-    @asynccontextmanager
-    async def _mk_session():
-        async with AsyncSession(bind=conn) as s:
-            yield s
 
     AsyncSession = async_sessionmaker(
         expire_on_commit=False, join_transaction_mode="create_savepoint"
     )
+
+    @asynccontextmanager
+    async def _mk_session():
+        async with AsyncSession(bind=conn) as s:
+            yield s
 
     async with engine.connect() as conn:
         await conn.begin_nested()

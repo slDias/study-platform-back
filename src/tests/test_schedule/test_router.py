@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from sqlalchemy.ext.asyncio.session import close_all_sessions
 from starlette.testclient import TestClient
 
 from schedule import Schedule, schedule_router
@@ -60,6 +61,7 @@ class TestPost:
         res = client.post("/", json=data)
 
         assert res.status_code == 200
+        await close_all_sessions()
         s = await session.get(Schedule, res.json()["id"])
         assert res.json() == {
             "id": s.id,
@@ -89,6 +91,7 @@ class TestPost:
         res = client.post("/", json=data)
 
         assert res.status_code == 200
+        await close_all_sessions()
         s = await session.get(Schedule, res.json()["id"])
         assert res.json() == {
             "id": s.id,
@@ -132,7 +135,6 @@ class TestPut:
         res = client.put(f"/{schedule_in_db.id}", json=data)
 
         assert res.status_code == 200
-        await session.refresh(schedule_in_db)
         assert res.json() == {
             "id": schedule_in_db.id,
             "task_id": expected_task_id,
@@ -141,7 +143,11 @@ class TestPut:
             "time_limit": expected_time_limit,
         }
 
-        assert schedule_in_db.cron == expected_cron
+        await close_all_sessions()
+        schedule = await session.get(Schedule, schedule_in_db.id)
+        assert schedule.task_id == expected_task_id
+        assert schedule.cron == expected_cron
+        assert schedule.time_limit == expected_time_limit
 
     def test_update_schedule_with_non_existent_task(
         self, client, schedule_in_db

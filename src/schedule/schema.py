@@ -15,7 +15,7 @@ class ScheduleSchema(BaseSchema):
     time_limit: int = Field(gt=0)
 
     @model_validator(mode="after")
-    def _validate(self):
+    def _validate(self) -> Self:
         self._check_has_a_task()
         self._check_cron_is_valid()
         return self

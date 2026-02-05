@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from sqlalchemy.ext.asyncio.session import close_all_sessions
 from starlette.testclient import TestClient
 
 from assignment import Assignment
@@ -25,7 +26,9 @@ async def expired_assignment(session, schedule_in_db):
 
 
 class TestGet:
-    def test_list_non_expired(self, client, assignment_in_db, expired_assignment):
+    def test_list_non_expired(
+        self, client, assignment_in_db, expired_assignment
+    ):
         res = client.get("/")
 
         assert res.status_code == 200
@@ -47,8 +50,9 @@ class TestPost:
         res = client.post(f"/{assignment_in_db.id}/submit")
 
         assert res.status_code == 200
-        await session.refresh(assignment_in_db)
-        assert assignment_in_db.submission_datetime is not None
+        await close_all_sessions()
+        updated_assignment = await session.get(Assignment, assignment_in_db.id)
+        assert updated_assignment.submission_datetime is not None
 
     def test_assignment_does_not_exists(self, client):
         res = client.post("/9999/submit")
